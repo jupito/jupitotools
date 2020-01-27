@@ -1,0 +1,41 @@
+# y=now.year,
+# m=now.month,
+# d=now.day,
+# i=now.isodate(),  # NB: It's a string.
+# wd=now.isoweekday(),
+# wk=now.isoweek(),
+# wy=now.isoweekyear(),
+# yd=now.yearday(),
+# a=(now.day - 1) // 7 + 1,
+# b=((now.replace(month=now.month + 1, day=1) - now).days - 1) // 7 + 1,
+# g=now.toordinal(),  # Gregorian ordinal. Jan 1 of year 1 is day 1.
+# posixday=int(now.timestamp() / 60**2 / 24),  # POSIX timestamp day.
+
+# @2020-01-27; Hello1 foo
+# @2020-01-28; Hello2 bar  # comment
+# wd==1 and wd;  weekday: {res}
+# wk>=5 and wk;  week: {res}
+# b==1 and b; b: {res} a={a} b={b} {i}.
+# y==2020 and m==1; Hello3 baz
+# y==2020 and m==2; Hello4 baz
+# y==2020 and d==27; Hello5 foz
+# wk==5 and wd==4; 17:00 Filosofiakerho @ Kirjasto
+# (wk, wd) == (5, 4); 17:00 Filosofiakerho @ Kirjasto
+
+
+# Holidays etc.
+* 2 14; Ystävänpäivä
+* 2 15; John Frum Day
+* 2 15; Lupercalia
+* 2 29; Karkauspäivä
+
+# Other recurring events.
+d==2; TODO: Maksa vuokra
+
+@2020-01-28; Älä syö, juo vain vettä (kuvaus huomenna)
+@2020-01-29; 08:30 Labra @ T-sairaalan labra (älä syö, juo vain lasillinen vettä)
+@2020-01-29; 09:00 Lääkäri (kuvaus) @ T-sairaala E-osa krs4 (sisäänk. 18A)
+@2020-01-31; V: TODO: Reservar cita para Doctor Mosakhani Neda, Haagan terveysasema (mira 2019-07-31)
+
+@2020-06-01; Muutto
+wd==4; Ruokajako @ Uusipesula, Vakke; https://operaatioruokakassi.com/auttamistyo/ruoka-apu/

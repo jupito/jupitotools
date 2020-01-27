@@ -1,0 +1,14 @@
+#!/usr/bin/python3
+
+"""..."""
+
+from blessings import Terminal
+
+term = Terminal()
+
+with term.fullscreen():
+    s = 'height, width: {t.underline}{t.height}, {t.width}{t.normal}'
+    print(s.format(t=term))
+    input()
+
+print('{t.black_on_yellow}Hello{t.normal}'.format(t=term))
