@@ -35,17 +35,19 @@ setuptools.setup(
     #     ],
     # },
     entry_points='''
-        [console_scripts]
+[console_scripts]
 
-        abbr-path = jupitotools.files:cli_abbr_path
+abbr-path = jupitotools.files:cli_abbr_path
 
-        scrappy = jupitotools.net.scrappy:cli
+scrappy = jupitotools.net.scrappy:cli
 
-        monday = jupitotools.time:cli_monday
-        cute-hours = jupitotools.time:cli_cute_hours
-        jwhen = jupitotools.time:cli_jwhen
+monday = jupitotools.time:cli_monday
+cute-hours = jupitotools.time:cli_cute_hours
+jwhen = jupitotools.time:cli_jwhen
 
-        probemedia = jupitotools.media.probe:cli_probemedia
-        ylemedia = jupitotools.media.ylemedia:cli_ylemedia
+probemedia = jupitotools.media.probe:cli_probemedia
+ylemedia = jupitotools.media.ylemedia:cli_ylemedia
+
+read_vcards_from_dump = jupitotools.contacts:cli_read_vcards_from_dump
     ''',
 )
