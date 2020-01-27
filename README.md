@@ -1,3 +1,3 @@
 # jupitotools
 
-Miscellaneous tools by jupito.
+A personal Python utility library.
