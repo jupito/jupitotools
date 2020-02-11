@@ -43,7 +43,8 @@ scrappy = jupitotools.net.scrappy:cli
 
 monday = jupitotools.time:cli_monday
 cute-hours = jupitotools.time:cli_cute_hours
-jwhen = jupitotools.time:cli_jwhen
+
+jwhen = jupitotools.jwhen:cli_jwhen
 
 probemedia = jupitotools.media.probe:cli_probemedia
 ylemedia = jupitotools.media.ylemedia:cli_ylemedia
