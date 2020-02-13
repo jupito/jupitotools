@@ -1,11 +1,12 @@
 """A `when(1)`-style simple calendar tool."""
 
 from pathlib import Path
+import re
 
 import click
 
 from .files import valid_lines
-from .time import Date, Datetime
+from .time import Date
 
 HELP = """
 From `when(1)` manual (http://www.lightandmatter.com/when/when.html):
@@ -106,6 +107,16 @@ class JWhen:
     def eval(self, s):
         """Evaluate expression."""
         # pylint: disable=eval-used
+        try:
+            res = parse_date_string(s)
+            print('###', s, res)
+            d = dict(zip('year month day'.split(), res))
+            print('###', s, d)
+            res = self.today == self.today.replace(**d)
+            return res
+        except ValueError:
+            # res = parse_date_exp(s)
+            pass
         if s[0] == '=':
             res = self.today.fromisoformat(s[1:])
         elif s[0] == '*':
@@ -127,6 +138,37 @@ class JWhen:
         if isinstance(res, type(self.today)):
             res = self.today == res
         return res
+
+
+def parse_date_string(s):
+    """Attempt to parse the expression as a simple date string."""
+    y = r'(\d\d\d\d)'
+    m = r'(\d\d)'
+    d = m
+    # wk = r'W' + d
+    # wd = r'(\d)'
+    # yd = r'(\d\d\d)'
+
+    # def groups(*strings, sep='-'):
+    #     it = (f'({x})' for x in strings)
+    #     return sep.join(it)
+
+    date_ymd = '-'.join([y, m, d])
+    # date_ym = '-'.join([y, m])
+    # date_ywd = '-'.join([y, wk, wd])
+    # date_yw = '-'.join([y, wk])
+    # date_yd = '-'.join([y, yd])
+
+    match = re.match(date_ymd, s)
+    if match is None:
+        raise ValueError('No valid date string found', s)
+    print('###', match.groups())
+    print('###', [int(x.lstrip('0')) for x in match.groups()])
+    return [int(x.lstrip('0')) for x in match.groups()]
+
+
+def parse_date_exp(s):
+    """Attempt to parse the expression as Python code."""
 
 
 def filepaths(paths, glob='*.jwhen'):
