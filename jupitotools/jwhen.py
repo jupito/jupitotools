@@ -1,5 +1,10 @@
 """A `when(1)`-style simple calendar tool."""
 
+# https://docs.python.org/3/library/functions.html#eval
+# https://docs.python.org/3/library/ast.html#ast.literal_eval
+# https://nedbatchelder.com/blog/201206/eval_really_is_dangerous.html
+# http://newville.github.io/asteval/
+
 from pathlib import Path
 import re
 
@@ -8,20 +13,18 @@ import click
 from .files import valid_lines
 from .time import Date
 
-HELP = """
-From `when(1)` manual (http://www.lightandmatter.com/when/when.html):
-    w - day of the week
-    m - month
-    d - day of the month
-    y - year
-    j - modified Julian day number
-    a - 1 for the first 7 days of the month, 2 for the next 7, etc.
-    b - 1 for the last 7 days of the month, 2 for the previous 7, etc.
-    c - on Monday or Friday, equals the day of the month of the nearest
-        weekend day; otherwise -1
-    e - days until this year's (Western) Easter
-    z - day of the year (1 on New Year's day)
-"""
+# From when(1) manual (http://www.lightandmatter.com/when/when.html):
+#     w - day of the week
+#     m - month
+#     d - day of the month
+#     y - year
+#     j - modified Julian day number
+#     a - 1 for the first 7 days of the month, 2 for the next 7, etc.
+#     b - 1 for the last 7 days of the month, 2 for the previous 7, etc.
+#     c - on Monday or Friday, equals the day of the month of the nearest
+#         weekend day; otherwise -1
+#     e - days until this year's (Western) Easter
+#     z - day of the year (1 on New Year's day)
 
 DEFAULT_FORMATS = dict(
     date_week='%m-%d %V~%u',
@@ -142,6 +145,7 @@ class JWhen:
 
 def parse_date_string(s):
     """Attempt to parse the expression as a simple date string."""
+    # https://en.wikipedia.org/wiki/ISO_8601
     y = r'(\d\d\d\d)'
     m = r'(\d\d)'
     d = m
@@ -167,8 +171,9 @@ def parse_date_string(s):
     return [int(x.lstrip('0')) for x in match.groups()]
 
 
-def parse_date_exp(s):
-    """Attempt to parse the expression as Python code."""
+# def parse_date_exp(s):
+#     """Attempt to parse the expression as Python code."""
+#     # TODO
 
 
 def filepaths(paths, glob='*.jwhen'):
