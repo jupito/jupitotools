@@ -5,6 +5,7 @@
 # https://nedbatchelder.com/blog/201206/eval_really_is_dangerous.html
 # http://newville.github.io/asteval/
 
+from functools import lru_cache
 from pathlib import Path
 # import re
 
@@ -33,43 +34,43 @@ DEFAULT_FORMATS = dict(
     )
 
 
-class Entry:
-    """Calendar entry."""
-    def __init__(self, expr, desc):
-        self.expr = expr
-        self.desc = desc
+class Event:
+    """Calendar event."""
+    SEP = ';'
 
-    @classmethod
-    def parse(cls, s):
-        expr, desc = (x.strip() for x in s.split(';', 1))
-        return cls(expr, desc)
+    def __init__(self, path, line):
+        self.path = path
+        self.expr, *self.descs = [x.strip() for x in line.split(self.SEP)]
+        self.desc = self.descs[0]
 
+    def __str__(self):
+        return f'{self.path}: {self.expr}; {self.desc}'
+
+    @lru_cache()
     def time(self):
-        return self.desc.split()[0]
+        """Return event time, or None."""
+        tokens = self.desc.split(maxsplit=1)
+        if tokens and '/' in tokens[0]:
+            return tokens[0]
+        return None
 
+    @lru_cache()
     def location(self):
-        return self.desc.split('@', 1).strip()
+        """Return event location, or None."""
+        tokens = self.desc.split('@', 1)
+        if len(tokens) > 1:
+            return tokens[1]
+        return None
 
 
-def yield_filepaths(paths, glob='*.jwhen'):
+def yield_filepaths(paths, glob='*.milloin'):
     """Get file paths, explicitly given files or expanded directories."""
-    # ~/.config/jwhen/test.jwhen
+    # ~/.config/jwhen/test1.milloin
     for path in paths:
         if path.is_dir():
             yield from sorted(x for x in path.glob(glob) if x.is_file())
         else:
             yield path
-
-
-def yield_entries(paths):
-    """Yield entries along paths."""
-    for path in yield_filepaths(paths):
-        for line in valid_lines(path):
-            try:
-                yield Entry.parse(line)
-            except ValueError as e:
-                e.args = e.args + (path,)
-                raise e
 
 
 @click.command()
@@ -106,15 +107,21 @@ def cli_milloin(paths, today, future, past, fmt, verbose):
     #     for each entry:
     #         if expression evaluates true with date, show description
 
-    dates = (today.tomorrow(x) for x in range(-past, future + 1))
+    dates = [today.tomorrow(x) for x in range(-past, future + 1)]
     print(f'Today is {today}.')
-    # print(list(dates))
-    # entries = yield_entries(paths)
+    paths = list(yield_filepaths(paths))
+    print(f'Filepaths: {", ".join(str(x) for x in paths)}.')
+    events = [Event(x, y) for x in paths for y in valid_lines(x)]
+
     for date in dates:
         if verbose > 0:
             marker = '*' if date == today else ' '
             print(f'{marker} {date}')
-    #     for entry in entries:
-    #         if entry.is_match(date):
+    #     for event in events:
+    #         if event.is_match(date):
     #             if verbose > 1:
-    #                 print(entry.desc)
+    #                 print(event.desc)
+    for event in events:
+        print(event)
+        if any([event.time(), event.location()]):
+            print('-', event.time(), event.location())
