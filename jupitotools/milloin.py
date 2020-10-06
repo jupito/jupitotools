@@ -68,7 +68,9 @@ def yield_filepaths(paths, glob='*.milloin'):
     # ~/.config/jwhen/test1.milloin
     for path in paths:
         if path.is_dir():
-            yield from sorted(x for x in path.glob(glob) if x.is_file())
+            # Descend to subdirectories maximum one level.
+            yield from sorted(x for x in path.glob(glob) if x.is_file() and
+                              x.suffix != '.disable')
         else:
             yield path
 
