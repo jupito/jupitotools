@@ -65,10 +65,8 @@ class Event:
 
 def yield_filepaths(paths, glob='*.milloin'):
     """Get file paths, explicitly given files or expanded directories."""
-    # ~/.config/jwhen/test1.milloin
     for path in paths:
         if path.is_dir():
-            # Descend to subdirectories maximum one level.
             yield from sorted(x for x in path.glob(glob) if x.is_file() and
                               x.suffix != '.disable')
         else:
