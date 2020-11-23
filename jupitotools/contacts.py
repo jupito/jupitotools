@@ -4,6 +4,9 @@
 # echo .dump | sqlite3 db.sqlite >> db.sqlite_dump.txt
 # grep -i 'insert into cards' db.sqlite_dump.txt >> cards_dump.txt
 
+# https://en.wikipedia.org/wiki/Telephone_number
+# https://en.wikipedia.org/wiki/Telephone_numbering_plan
+
 import re
 import sys
 # from pathlib import Path
