@@ -7,7 +7,7 @@ import shutil
 import urllib
 from pathlib import PurePath
 
-from pyutils.misc import fmt_size, truncate
+from ..misc import fmt_size, truncate
 
 
 def url_suffix(url):

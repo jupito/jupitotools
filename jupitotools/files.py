@@ -201,6 +201,11 @@ def tempfile_and_backup(path, mode, bakext='.bak', **kwargs):
                 os.remove(fp.name)
 
 
+def ensure_dir(path):
+    """Ensure existence of the file's parent directory."""
+    Path(path).parent.mkdir(parents=True, exist_ok=True)
+
+
 def sanitize_line(line, commenter='#'):
     """Clean up input line."""
     return line.split(commenter, 1)[0].strip()
