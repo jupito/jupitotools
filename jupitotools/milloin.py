@@ -4,10 +4,11 @@
 # https://docs.python.org/3/library/ast.html#ast.literal_eval
 # https://nedbatchelder.com/blog/201206/eval_really_is_dangerous.html
 # http://newville.github.io/asteval/
+# https://en.wikipedia.org/wiki/ISO_8601
 
 from functools import lru_cache
 from pathlib import Path
-# import re
+import re
 
 import click
 
@@ -70,8 +71,36 @@ class Event:
     def match(self, date, today):
         """Does date match with event?"""
         # TODO
-        # return True
-        return abs(date.toordinal() - today.toordinal()) < 2
+        try:
+            y, m, d = parse_date_string(self.expr)
+            parsed = Date(y or today.year, m or today.month, d or today.day)
+            return date == parsed
+        except ValueError as e:
+            print(e)
+        # # TODO: For testing.
+        # return abs(date.toordinal() - today.toordinal()) < 2
+
+
+def parse_date_string(s):
+    """Attempt to parse the expression as a simple date string."""
+    # Empty or zero is a wildcard.
+    y = r'(\d\d\d\d)'
+    m = r'(\d\d)'
+    d = m
+    # wk = r'W' + d
+    # wd = r'(\d)'
+    # yd = r'(\d\d\d)'
+
+    date_ymd = '-'.join([y, m, d])
+    # date_ym = '-'.join([y, m])
+    # date_ywd = '-'.join([y, wk, wd])
+    # date_yw = '-'.join([y, wk])
+    # date_yd = '-'.join([y, yd])
+
+    match = re.match(date_ymd, s)
+    if match is None:
+        raise ValueError('No valid date string found', s)
+    return [int(x) for x in match.groups()]
 
 
 def yield_filepaths(paths, glob='*.milloin'):
