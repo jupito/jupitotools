@@ -84,6 +84,15 @@ def yield_filepaths(paths, glob='*.milloin'):
             yield path
 
 
+def get_matches(dates, events, today):
+    """Get matches."""
+    def collect_matches(date):
+        def is_match(event):
+            return event.match(date, today)
+        return filter(is_match, events)
+    return {x: list(collect_matches(x)) for x in dates}
+
+
 def date_marker(date, today):
     """Return a one-character date marker."""
     if date == today:
@@ -126,18 +135,13 @@ def cli(ctx, path, today, future, past, fmt, verbose):
         print(f'Filepaths: {", ".join(str(x) for x in paths)}.')
 
 
-@cli.command()
+@cli.command('agenda')
 @click.pass_context
-def agenda(ctx):
+def cli_agenda(ctx):
     """Print agenda."""
     today = ctx.obj['today']
 
-    def collect_matches(date):
-        def event_matches(event):
-            return event.match(date, today)
-        return filter(event_matches, ctx.obj['events'])
-    matches = {x: list(collect_matches(x)) for x in ctx.obj['dates']}
-
+    matches = get_matches(ctx.obj['dates'], ctx.obj['events'], today)
     for date, events in matches.items():
         marker = date_marker(date, today)
         datestr_normal = str(date)
@@ -150,18 +154,18 @@ def agenda(ctx):
             print(f'{marker} {datestr} {eventstr}')
 
 
-@cli.command()
+@cli.command('dates')
 @click.pass_context
-def dates(ctx):
+def cli_list_dates(ctx):
     """List dates."""
     for date in ctx.obj['dates']:
         marker = date_marker(date, ctx.obj['today'])
         print(f'{marker} {date}')
 
 
-@cli.command()
+@cli.command('all')
 @click.pass_context
-def events(ctx):
+def cli_list_all_events(ctx):
     """List all events."""
     for event in ctx.obj['events']:
         print(event)
