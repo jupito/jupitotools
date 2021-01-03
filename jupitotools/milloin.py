@@ -123,12 +123,6 @@ def print_agenda(matches, today):
 
 
 @click.group()
-def cli():
-    pass
-
-
-@cli.command()
-@click.argument('paths', nargs=-1, type=Path, metavar='[PATH]...')
 @click.option('-t', '--today', help='Date today.')
 @click.option('-f', '--future', type=int, default=7,
               help='Number of future days to show (current day included).')
@@ -136,13 +130,27 @@ def cli():
               help='Number of past days to show.')
 @click.option('--fmt', default='date_week', help='Output date format.')
 @click.option('-v', '--verbose', count=True, help='Increase verbosity.')
-def agenda(paths, today, future, past, fmt, verbose):
-    """Process a when(1)-style file."""
+@click.pass_context
+def cli(ctx, today, future, past, fmt, verbose):
+    """A when(1)-style calendar application."""
+    ctx.ensure_object(dict)
+    today = Date.fromisoformat(today) if today else Date.today()
+    ctx.obj['today'] = today
+    ctx.obj['dates'] = [today.tomorrow(x) for x in range(-past, future + 1)]
+    ctx.obj['fmt'] = DEFAULT_FORMATS.get(fmt, fmt)
+
+
+@cli.command()
+@click.argument('paths', nargs=-1, type=Path, metavar='[PATH]...')
+@click.pass_context
+def agenda(ctx, paths):
+    """Show agenda."""
     if not paths:
         # ~/.config/milloin/*.milloin
         paths = [Path(click.get_app_dir('milloin'))]
-    today = Date.fromisoformat(today) if today else Date.today()
-    fmt = DEFAULT_FORMATS.get(fmt, fmt)
+    verbose = ctx.parent.params['verbose']
+    today = ctx.obj['today']
+    dates = ctx.obj['dates']
 
     # for each file:
     #     for each line:
@@ -152,7 +160,6 @@ def agenda(paths, today, future, past, fmt, verbose):
     #     for each entry:
     #         if expression evaluates true with date, show description
 
-    dates = [today.tomorrow(x) for x in range(-past, future + 1)]
     paths = list(yield_filepaths(paths))
     events = [Event(y, x) for x in paths for y in valid_lines(x)]
 
