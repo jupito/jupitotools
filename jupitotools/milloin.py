@@ -90,7 +90,7 @@ def get_matches(dates, events, today):
         def is_match(event):
             return event.match(date, today)
         return filter(is_match, events)
-    return {x: collect_matches(x) for x in dates}
+    return {x: list(collect_matches(x)) for x in dates}
 
 
 def date_marker(date, today):
