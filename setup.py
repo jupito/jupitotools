@@ -45,7 +45,7 @@ monday = jupitotools.time:cli_monday
 cute-hours = jupitotools.time:cli_cute_hours
 
 jwhen = jupitotools.jwhen:cli_jwhen
-milloin = jupitotools.milloin:cli_milloin
+milloin = jupitotools.milloin:cli
 
 probemedia = jupitotools.media.probe:cli_probemedia
 ylemedia = jupitotools.media.ylemedia:cli_ylemedia

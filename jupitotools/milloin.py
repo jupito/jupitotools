@@ -38,10 +38,14 @@ class Event:
     """Calendar event."""
     SEP = ';'
 
-    def __init__(self, path, line):
+    def __init__(self, line, path):
+        self.line = line
         self.path = path
         self.expr, *self.descs = [x.strip() for x in line.split(self.SEP)]
         self.desc = self.descs[0]
+
+    # def tokens(self):
+    #     return (x.strip() for x in self.line.split(self.SEP))
 
     def __str__(self):
         return f'{self.path}: {self.expr}; {self.desc}'
@@ -62,6 +66,13 @@ class Event:
             return tokens[1]
         return None
 
+    @lru_cache()
+    def match(self, date, today):
+        """Does date match with event?"""
+        # TODO
+        # return True
+        return abs(date.toordinal() - today.toordinal()) < 2
+
 
 def yield_filepaths(paths, glob='*.milloin'):
     """Get file paths, explicitly given files or expanded directories."""
@@ -73,7 +84,50 @@ def yield_filepaths(paths, glob='*.milloin'):
             yield path
 
 
-@click.command()
+def print_dates(dates, today):
+    for date in dates:
+        marker = '*' if date == today else ' '
+        print(f'{marker} {date}')
+
+
+def print_events(events):
+    for event in events:
+        print(event)
+        if any([event.time(), event.location()]):
+            print('-', event.time(), event.location())
+
+
+def date_marker(date, today):
+    """Return a one-character date marker."""
+    if date == today:
+        return '*'
+    if date == today.tomorrow():
+        return '+'
+    if date == today.tomorrow(-1):
+        return '-'
+    return ' '
+
+
+def print_agenda(matches, today):
+    """Print agenda."""
+    for date, events in matches.items():
+        marker = date_marker(date, today)
+        datestr_normal = str(date)
+        datestr_repeating = ' ' * len(datestr_normal)
+        if not events:
+            print(f'{marker} {datestr_normal} (no events)')
+        for i, event in enumerate(events):
+            datestr = datestr_normal if i == 0 else datestr_repeating
+            eventstr = str(event)[:70]
+            print(f'{marker} {datestr} {eventstr}')
+
+
+@click.group()
+def cli():
+    pass
+
+
+@cli.command()
 @click.argument('paths', nargs=-1, type=Path, metavar='[PATH]...')
 @click.option('-t', '--today', help='Date today.')
 @click.option('-f', '--future', type=int, default=7,
@@ -82,22 +136,13 @@ def yield_filepaths(paths, glob='*.milloin'):
               help='Number of past days to show.')
 @click.option('--fmt', default='date_week', help='Output date format.')
 @click.option('-v', '--verbose', count=True, help='Increase verbosity.')
-def cli_milloin(paths, today, future, past, fmt, verbose):
+def agenda(paths, today, future, past, fmt, verbose):
     """Process a when(1)-style file."""
     if not paths:
         # ~/.config/milloin/*.milloin
         paths = [Path(click.get_app_dir('milloin'))]
     today = Date.fromisoformat(today) if today else Date.today()
     fmt = DEFAULT_FORMATS.get(fmt, fmt)
-    # jwhen = JWhen(today=today)
-    # begin = jwhen.today
-    # for i in range(-past, future):
-    #     jwhen.set_today(begin.tomorrow(i))
-    #     formatted = jwhen.today.strftime(fmt)
-    #     relative = relative_date(i)
-    #     for path in filepaths(paths):
-    #         for res, desc, d in do_file(jwhen, path):
-    #             output(res, desc, d, formatted, relative, verbose)
 
     # for each file:
     #     for each line:
@@ -108,20 +153,21 @@ def cli_milloin(paths, today, future, past, fmt, verbose):
     #         if expression evaluates true with date, show description
 
     dates = [today.tomorrow(x) for x in range(-past, future + 1)]
-    print(f'Today is {today}.')
     paths = list(yield_filepaths(paths))
-    print(f'Filepaths: {", ".join(str(x) for x in paths)}.')
-    events = [Event(x, y) for x in paths for y in valid_lines(x)]
+    events = [Event(y, x) for x in paths for y in valid_lines(x)]
 
-    for date in dates:
-        if verbose > 0:
-            marker = '*' if date == today else ' '
-            print(f'{marker} {date}')
-    #     for event in events:
-    #         if event.is_match(date):
-    #             if verbose > 1:
-    #                 print(event.desc)
-    for event in events:
-        print(event)
-        if any([event.time(), event.location()]):
-            print('-', event.time(), event.location())
+    def collect_matches(date, events, today):
+        # it = (x if x.match(date, today) else None for x in events)
+        # yield from filter(None, it)
+        def event_matches(event):
+            return event.match(date, today)
+        return filter(event_matches, events)
+    matches = {x: list(collect_matches(x, events, today)) for x in dates}
+
+    if verbose > 0:
+        print(f'Today is {today}.')
+        print(f'Filepaths: {", ".join(str(x) for x in paths)}.')
+        print_dates(dates, today)
+    if verbose > 1:
+        print_events(events)
+    print_agenda(matches, today)
