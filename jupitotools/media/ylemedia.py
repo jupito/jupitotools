@@ -49,15 +49,15 @@ class YleMedia:
     def get_url(self):
         """Get media content URL."""
         args = fmt_args('{cmd} --showurl {url}', **self._data)
-        completed = subprocess.run(args, timeout=TIMEOUT, **self._runargs)
-        return completed.stdout.strip()
+        proc = subprocess.run(args, timeout=TIMEOUT, **self._runargs)
+        return proc.stdout.strip()
 
     @lru_cache(None)
     def metadata(self):
         """Get media metadata."""
         args = fmt_args('{cmd} --showmetadata {url}', **self._data)
-        completed = subprocess.run(args, timeout=TIMEOUT, **self._runargs)
-        return one(json.loads(completed.stdout))
+        proc = subprocess.run(args, timeout=TIMEOUT, **self._runargs)
+        return one(json.loads(proc.stdout))
 
     def publish_time(self):
         """Publish time."""
@@ -126,15 +126,15 @@ class YleMedia:
     def download(self):
         """Download media."""
         args = fmt_args('{cmd} --sublang {sublang} {url}', **self._data)
-        completed = subprocess.run(args, timeout=None, **self._runargs)
-        return completed.stdout
+        proc = subprocess.run(args, timeout=None, **self._runargs)
+        return proc.stdout
 
     def download_subtitles(self):
         """Download subtitles."""
         args = fmt_args('{cmd} --subtitlesonly --sublang {sublang} {url}',
                         **self._data)
-        completed = subprocess.run(args, timeout=None, **self._runargs)
-        return completed.stdout
+        proc = subprocess.run(args, timeout=None, **self._runargs)
+        return proc.stdout
 
     def summary(self):
         """Get summary text."""
