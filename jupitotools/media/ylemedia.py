@@ -42,12 +42,8 @@ class YleMedia:
         return url.strip()
 
     @property
-    def _popenargs(self):
-        return dict(stdout=subprocess.PIPE, text=True)
-
-    @property
     def _runargs(self):
-        return dict(self._popenargs, check=True)
+        return dict(stdout=subprocess.PIPE, text=True, check=True)
 
     @lru_cache(None)
     def get_url(self):
