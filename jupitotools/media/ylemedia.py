@@ -22,41 +22,41 @@ from tabulate import tabulate
 
 from ..misc import fmt_args, fmt_bitrate, fmt_size, one
 
-TIMEOUT = 10
-
 
 class YleMedia:
     """Media downloader that uses yle-dl externally."""
 
-    def __init__(self, url, **kwargs):
+    def __init__(self, url, cmd='yle-dl', sublang='none'):
         """Initialize with URL."""
-        url = self.normalize_url(url)
-        cmd = kwargs.get('cmd', 'yle-dl')
-        sublang = kwargs.get('sublang', 'none')
-        self._data = dict(url=url, cmd=cmd, sublang=sublang)
+        self.url = self._normalize_url(url)
+        self.cmd = cmd
+        self.sublang = sublang
 
     @staticmethod
-    def normalize_url(url):
+    def _normalize_url(url):
         """Normalize URL."""
         # TODO
         return url.strip()
 
-    @property
-    def _runargs(self):
-        return dict(stdout=subprocess.PIPE, text=True, check=True)
+    @staticmethod
+    def _run(args):
+        """Run subprocess."""
+        return subprocess.run(args, stdout=subprocess.PIPE, text=True,
+                              check=True)
 
     @lru_cache(None)
     def get_url(self):
         """Get media content URL."""
-        args = fmt_args('{cmd} --showurl {url}', **self._data)
-        proc = subprocess.run(args, timeout=TIMEOUT, **self._runargs)
+        args = fmt_args('{cmd} --showurl {url}', cmd=self.cmd, url=self.url)
+        proc = self._run(args)
         return proc.stdout.strip()
 
     @lru_cache(None)
     def metadata(self):
         """Get media metadata."""
-        args = fmt_args('{cmd} --showmetadata {url}', **self._data)
-        proc = subprocess.run(args, timeout=TIMEOUT, **self._runargs)
+        args = fmt_args('{cmd} --showmetadata {url}', cmd=self.cmd,
+                        url=self.url)
+        proc = self._run(args)
         return one(json.loads(proc.stdout))
 
     def publish_time(self):
@@ -125,15 +125,16 @@ class YleMedia:
 
     def download(self):
         """Download media."""
-        args = fmt_args('{cmd} --sublang {sublang} {url}', **self._data)
-        proc = subprocess.run(args, timeout=None, **self._runargs)
+        args = fmt_args('{cmd} --sublang {sublang} {url}', cmd=self.cmd,
+                        sublang=self.sublang, url=self.url)
+        proc = self._run(args)
         return proc.stdout
 
     def download_subtitles(self):
         """Download subtitles."""
         args = fmt_args('{cmd} --subtitlesonly --sublang {sublang} {url}',
-                        **self._data)
-        proc = subprocess.run(args, timeout=None, **self._runargs)
+                        cmd=self.cmd, sublang=self.sublang, url=self.url)
+        proc = self._run(args)
         return proc.stdout
 
     def summary(self):
