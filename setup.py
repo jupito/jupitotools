@@ -40,6 +40,7 @@ setuptools.setup(
 abbr-path = jupitotools.files:cli_abbr_path
 
 scrappy = jupitotools.net.scrappy:cli
+scan-urls = jupitotools.net.url:cli_scan_urls
 
 monday = jupitotools.time:cli_monday
 cute-hours = jupitotools.time:cli_cute_hours
